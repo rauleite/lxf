@@ -1,7 +1,7 @@
 #!/bin/bash
 ### Altere estas constantes, caso queira mudar o local ###
-SRC_PATH="/usr/local/src"
-BIN_PATH="/usr/local/bin"
+declare -r SRC_PATH="/usr/local/src"
+declare -r BIN_PATH="/usr/local/bin"
 
 src_path="./src"
 bin_path="./bin"
