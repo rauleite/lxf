@@ -1,6 +1,6 @@
 #!/bin/bash
 ### Altere estas constantes, caso queira mudar o local ###
-source src_install.sh
+source ./src_install.sh
 
 # src_dest="./teste/src"
 # bin_dest="./teste/bin"
