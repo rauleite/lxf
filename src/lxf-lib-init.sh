@@ -2,7 +2,7 @@
 declare -r LOCAL_PATH="$(pwd)"
 declare CONFIG
 declare CONTAINER
-declare DEST_PATH
+declare STORAGE_PATH
 declare IMAGE
 declare IPV4
 declare NETWORK
@@ -44,9 +44,9 @@ function VAR (){
     echo_info "[ VAR ] $@"
     export $1="$2" 
 }
-function DEST_PATH () {
-    echo_info "[ DEST_PATH ] $@"
-    DEST_PATH=$@
+function STORAGE_PATH () {
+    echo_info "[ STORAGE_PATH ] $@"
+    STORAGE_PATH=$@
 }
 function SOURCE () {
     source $@

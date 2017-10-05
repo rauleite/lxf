@@ -128,7 +128,6 @@ function lexico () {
         "CONTAINER" \
         "COPY" \
         "COPY_SSH" \
-        "DEST_PATH" \
         "ENV" \
         "EXEC" \
         "EXEC_SSH" \
@@ -140,6 +139,7 @@ function lexico () {
         "NETWORK" \
         "PRIVILEGED" \
         "SOURCE" \
+        "STORAGE_PATH" \
         "USER_NAME" \
         "USER_GROUP" \
         "VAR" \
