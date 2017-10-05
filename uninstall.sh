@@ -1,5 +1,5 @@
 #!/bin/bash
-source ./install.sh
+source ./src_install.sh
 
 for i in ${src_files[@]}
 do

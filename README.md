@@ -4,9 +4,11 @@ Um framework LXD que automatiza o *build machine* através de execução de coma
 Download e Install
 ---
 ```
-git clone https://github.com/rauleite/lxf.git
-cd lxf
+git clone https://github.com/rauleite/lxf.git && cd lxf
 ./install.sh
+
+# Opcional:
+cd ../ && rm -r ./lxf
 ```
 #### Default Paths:
 * Source: */usr/local/src*
@@ -35,5 +37,9 @@ Para facilitar o manuseio, não é utilizado variáveis de ambiente. Portanto, b
 Para desinstalar: 
 ```
 ./uninstall
+```
+ou *(caso não tenha mais os resources baixado)*
+```
+git clone https://github.com/rauleite/lxf.git && cd lxf && ./uninstall.sh && cd ../ && sudo rm -r ./lxf
 ```
 Obs. Mesmo no caso de ter customizado o Path ao instalar, o comando acima é suficiente pra remover os arquivos corretos.
