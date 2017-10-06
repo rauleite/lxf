@@ -70,10 +70,11 @@ usage () {
     echo -e ${nc}
     
 }
-
+# has_arg="false"
 while true; do
-    if [[ ! $1 =~ ^(-) ]]
-    then
+    # Se existe e nao comeca com -
+    if [[ ! -z $1 && ! $1 =~ ^(-) ]]; then
+        echo opa
         msg_error="argumento invalido: $1"
         usage
         exit 1
@@ -140,9 +141,12 @@ while true; do
             QUIET="true"
         ;;
         *)
-            msg_error="argumento invalido: $1"
-            usage
-            exit 1
+            # Se ha argumento, mas nao bate com nenhum
+            if [[ ! -z $1 ]]; then
+                msg_error="argumento invalido: $1"
+                usage
+                exit 1
+            fi
         ;;
     esac
     shift

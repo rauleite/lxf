@@ -28,7 +28,8 @@ declare is_started="false"
 init () {
     [[ $is_started == "true" ]] && return 0
     [[ ! -z $FROM_VALUE ]]      && FROM_INIT $FROM_VALUE
-    [[ ! -z $STORAGE_PATH ]]    && STORAGE_PATH=$STORAGE_PATH/$CONTAINER/rootfs
+    # [[ ! -z $STORAGE_PATH ]]    && STORAGE_PATH=$STORAGE_PATH/$CONTAINER/rootfs
+    [[ ! -z $STORAGE_PATH ]]    && STORAGE_PATH=$STORAGE_PATH
     [[ ! -z $ENV_VALUE ]]       && ENV_INIT $ENV_VALUE
     # [[ ! -z $FILES_VALUE ]]     && FILES_INIT $FILES_VALUE
     # [[ ! -z $FILES_SSH_VALUE ]] && FILES_SSH_INIT $FILES_SSH_VALUE

@@ -320,7 +320,7 @@ function post_from () {
     [[ $? != "0" ]] && echo_error "Usuario $USER_NAME inexistente" && read_user
     echo_info "[ USER ] $USER_NAME:$USER_GROUP"
     # attach_network
-    install_rsync
+    # install_rsync
     
 }
 function create_container () {

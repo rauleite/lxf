@@ -14,13 +14,12 @@ cd ../ && sudo rm -r ./lxf #Opcional
 
 Já tendo feito o `sudo lxd init`, como descrito na página de [configurações iniciais do lxd](https://stgraber.org/2016/03/15/lxd-2-0-installing-and-configuring-lxd-212/), basta criar o seguinte arquivo:
 
-Crie o arquivo de exemplo: **`lxf-file.sh`**
+Crie o arquivo de exemplo: **`lxf-app.sh`**
 
 ```bash
-# lxf-file.sh
+# lxf-app.sh
 
 # Configurações básicas
-CONTAINER "app"
 NETWORK "lxcbr0"
 STORAGE_PATH "/var/lib/lxd/storage-pools/zfs/containers" # coloque o seu storage path
 
@@ -33,7 +32,7 @@ FROM ubuntu/zesty/amd64
 # Executa comandos no container
 EXEC apt-get install -y software-properties-common
 ```
-No mesmo diretório, execute: `lxf file` 
+No mesmo diretório, execute: `lxf app` 
 
 Pronto, sua máquina será montada.
 
@@ -42,7 +41,7 @@ Pronto, sua máquina será montada.
 ## Sessões do manual
 
 ### Comandos Cli
-Todos os argumentos passados via linha de comando terão prevalência sobre seus equivalentes existentes no arquivo.
+Todos os argumentos passados via linha de comando terão precedência sobre seus equivalentes existentes no arquivo.
 
 ![help](https://github.com/rauleite/lxf/blob/master/help.png "lxf -h - brazilian help")
 
@@ -550,12 +549,12 @@ VOLUME $web_host/config/proxy/nginx.conf /etc/nginx/nginx.conf
 ## Execução do arquivo
 A extensão **.sh** é opcional (use para usufruir da colorização dos editores). Pode deixar sem nenhuma extensão se preferir.
 
-Todas as seguintes maneiras de chamar o arquivo **`lxf-file.sh`**, são válidas:
+Todas as seguintes maneiras de chamar o arquivo **`lxf-app.sh`**, são válidas:
 
-* `lxf file` (sem lxf e .sh) 
-* `lxf lxf-file.sh` (nome do arquivo completo)
-* `lxf file.sh` (sem lxf)
-* `lxf lxf-file` (sem .sh)
+* `lxf app` (sem lxf e .sh) 
+* `lxf lxf-app.sh` (nome do arquivo completo)
+* `lxf app.sh` (sem lxf)
+* `lxf lxf-app` (sem .sh)
 
 ## Detalhes sobre a instalação
 A instalação nada mais é do que alguns arquivos que são incluidos em seus respectivos paths. Sem alterações em arquivos como ~/.bashrc ou qualquer outro. A remoção, é a exclusão destes.

@@ -1,17 +1,8 @@
 #!/bin/bash
 declare -r LOCAL_PATH="$(pwd)"
 declare CONFIG
-# declare CONTAINER
 declare STORAGE_PATH
 declare IMAGE
-# declare IPV4
-# declare NETWORK
-# declare PRIVILEGED
-# declare USER_NAME
-# declare USER_GROUP
-
-# declare FROM_VALUE
-# declare ENV_VALUE
 declare VOLUME_VALUE
 declare FILES_VALUE
 declare FILES_SSH_VALUE
