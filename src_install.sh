@@ -2,8 +2,8 @@
 declare -r SRC_PATH="/usr/local/src"
 declare -r BIN_PATH="/usr/local/bin"
 
-src_path="./src"
-bin_path="./bin"
+src_path="$(pwd)/src"
+bin_path="$(pwd)/bin"
 src_files=(\
     "lxf-colors.sh" \
     "lxf-lib-dinam.sh" \

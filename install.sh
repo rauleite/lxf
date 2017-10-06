@@ -2,9 +2,6 @@
 ### Altere estas constantes, caso queira mudar o local ###
 source ./src_install.sh
 
-# src_dest="./teste/src"
-# bin_dest="./teste/bin"
-
 for i in ${src_files[@]}
 do
     sudo cp -vrf $src_path/$i    $src_dest

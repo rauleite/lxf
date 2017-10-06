@@ -1,26 +1,23 @@
 # LXFramework
 Um framework LXD que automatiza o *build machine* através de execução de comandos em série.
 
-Download e Install
----
+## Download e Install
+
 ```bash
 git clone https://github.com/rauleite/lxf.git && cd lxf
 ./install.sh
 cd ../ && sudo rm -r ./lxf #Opcional
 ```
-#### Default Paths
-Segue local padrão do src e bin
-* **/usr/local/src**
-* **/usr/local/bin**
+*Para maiores detalhes sobre a instalação, paths e desinstação, [aqui](detalhes-sobre-a-instalação)*
 
-Como [alterar default paths](#alterar-paths).
+## Get started
 
-Como [desinstalar](#uninstall).
+Já tendo feito o `sudo lxd init`, como descrito na página de [configurações iniciais do lxd](https://stgraber.org/2016/03/15/lxd-2-0-installing-and-configuring-lxd-212/), basta criar o seguinte arquivo:
 
-Get started
----
+Crie arquivo: **`lxf-file.sh`**
+
 ```bash
-# Arquivo: lxf-file.sh
+# lxf-file.sh
 
 # Configurações básicas
 CONTAINER "app"
@@ -35,26 +32,19 @@ FROM ubuntu/zesty/amd64
 # Executa comandos no container
 EXEC apt-get install -y software-properties-common
 ```
-#### Maneiras de execução:
-No mesmo diretório do arquivo (lxf-file.sh, no caso acima), execute:
-```bash
-lxf file
-``` 
-#### Notas:
-1. A extensão **.sh** é opcional (use em caso de preferir pela colorização dos editores). Pode deixar sem nenhuma extensão se preferir.
-1. Durante o comando ( `lxf file` ), note que não precisa digitar a parte **lxf-** do começo arquivo, e nem **.sh** do final.
+No mesmo diretório, execute:
 
-Todas as seguintes maneiras de chamar o arquivo, são válidas:
-* `lxf file` (mais simples) 
-* `lxf lxf-file.sh` (nome do arquivo completo)
-* `lxf file.sh` (sem lxf)
-* `lxf lxf-file` (sem .sh)
+`lxf file` 
 
-Sessões do tutorial
+Pronto, sua máquina será montada.
+
+*Mais sobre execução pelo nome arquivo, [aqui](execução-do-arquivo)*
+
+Sessões do manual
 ---
 ### Tabela Rápida
-* [Comandos de configuração](#comandos-de-criacao)
-* [Comandos de execução](#comandos-de-execucao)
+* [Comandos de criação](#comandos-de-criação)
+* [Comandos de execução](#comandos-de-execução)
 
 ### Todos os comandos
 * [CONFIG](#config)
@@ -76,10 +66,9 @@ Sessões do tutorial
 * [VOLUME](#volume)
 
 
-Tabela rápida de comandos
----
+## Tabela rápida de comandos
 
-## Comandos de Criação
+### Comandos de Criação
 
 São chamado comandos de criação, aqueles utilizados para configuração pré criação do container. Normalmente ficam ficam dispostos nas linhas antes do comando **FROM**.
 
@@ -95,19 +84,19 @@ CONFIG "set $CONTAINER security.privileged true"
 # FROM ...
 ```
 
-Comando                     | Descrição                         | Sintaxe
-:--                         | :--                               | :--
+Comando                     | Descrição                             | Sintaxe
+:--                         | :--                                   | :--
 [CONFIG](#config)           | Qualquer [configuração lxd](https://github.com/lxc/lxd/blob/master/doc/configuration.md)   | `CONFIG <lxc-config>`
-[CONTAINER](#container)     | Nome do container                 | `CONTAINER <name>`
-[STORAGE_PATH](#dest_path)  | Path do Storage                   | `STORAGE_PATH "<path>"`
-[IPV4](#ipv4)               | Alias para ipv4 config            | `IPV4 <ip.fixo.do.container>`
-[NETWORK](#network)         | Nome do device para brigde        | `NETWORK <nome do device>`
-[PRIVILEGED](#privileged)   | Alias para privileged config      | `PRIVILEGED "<true|false>"`
-[USER_NAME](#user_name)     | User assumido para os comandos    | `USER_NAME "<name>"`
-[USER_GROUP](#user_group)   | Group assumido para os comandos   | `USER_GROUP "<group>"`
-[VAR](#var)                 | Define variáveis                  | `VAR <key> "<value>"`
+[CONTAINER](#container)         | Nome do container                 | `CONTAINER "<name>"`
+[STORAGE_PATH](#storage_path)   | Path do Storage                   | `STORAGE_PATH "<path>"`
+[IPV4](#ipv4)                   | Alias para ipv4 config            | `IPV4 <ip.fixo.do.container>`
+[NETWORK](#network)             | Nome do device para brigde        | `NETWORK <nome do device>`
+[PRIVILEGED](#privileged)       | Alias para privileged config      | `PRIVILEGED "<true|false>"`
+[USER_NAME](#user_name)         | User assumido para os comandos    | `USER_NAME "<name>"`
+[USER_GROUP](#user_group)       | Group assumido para os comandos   | `USER_GROUP "<group>"`
+[VAR](#var)                     | Define variáveis                  | `VAR <key> "<value>"`
 
-## Comandos de Execução
+### Comandos de Execução
 
 São chamados comandos de execução aqueles que rodam logo após o container ser criado. Pode ser entendido que são basicamente aqueles dispostos nas linhas após o comando **FROM**.
 
@@ -132,9 +121,12 @@ Comando                     | Descrição                         | Sintaxe
 [VOLUME](#volume)           | Arquivo e diretorio compartilhado | `VOLUME <local-path> <container-path>`
 
 
-Comandos Detalhados
----
+## Comandos Detalhados
+
 #### CONFIG
+```bash
+CONFIG <lxc-config>
+```
 * Utilizado para setar qualquer [configuração lxd](https://github.com/lxc/lxd/blob/master/doc/configuration.md), junto à criação do container.
 * Pode repetir o commando **CONFIG** quantas vezes forem necessárias, para criação do container desejado.
 
@@ -154,7 +146,11 @@ CONFIG "device set $CONTAINER $NETWORK ipv4.address 10.99.125.10"
 # FROM ...
 ```
 
-#### CONTAINER
+### CONTAINER
+```bash
+CONTAINER "<name>"
+```
+
 * Nome atribuido ao container
 * Se não existir container com este nome, um novo será criado. Caso contrário utilizará o container existente.
 * O comando **CONTAINER** também pode ser utilizado como variável no corpo do arquivo:
@@ -168,38 +164,172 @@ CONFIG "set $CONTAINER security.privileged true"
 # FROM ...
 ```
 
-#### COPY
+### COPY
+```bash
+COPY <host path> <container path>
+```
+Copia arquivo ou diretório, do host para o container.
 
-#### DEST_PATH
+##### Exemplo
+```bash
 
-#### ENV
+```
 
-#### EXEC
+### STORAGE_PATH
+```bash
+`STORAGE_PATH "<path>"`
+```
 
-#### FILES
+##### Exemplo
+```bash
 
-#### FROM
+```
 
-#### HOST_EXEC
+### ENV
+```bash
 
-#### IPV4
+```
 
-#### NETWORK
+##### Exemplo
+```bash
 
-#### PRIVILEGED
+```
 
-#### SOURCE
+### EXEC
+```bash
 
-#### USER_NAME
+```
 
-#### USER_GROUP
+##### Exemplo
 
-#### VAR
+### FILES
+```bash
 
-#### VOLUME
+```
 
-Alterar Paths
----
+##### Exemplo
+```bash
+
+```
+
+### FROM
+```bash
+
+```
+
+##### Exemplo
+```bash
+
+```
+
+### HOST_EXEC
+```bash
+
+```
+
+##### Exemplo
+```bash
+
+```
+
+### IPV4
+```bash
+
+```
+
+##### Exemplo
+```bash
+
+```
+
+### NETWORK
+```bash
+
+```
+
+##### Exemplo
+```bash
+
+```
+
+### PRIVILEGED
+```bash
+
+```
+
+##### Exemplo
+```bash
+
+```
+
+### SOURCE
+```bash
+
+```
+
+##### Exemplo
+```bash
+
+```
+
+### USER_NAME
+```bash
+
+```
+
+##### Exemplo
+```bash
+
+```
+
+### USER_GROUP
+```bash
+
+```
+
+##### Exemplo
+```bash
+
+```
+
+### VAR
+```bash
+
+```
+
+##### Exemplo
+```bash
+
+```
+
+### VOLUME
+```bash
+
+```
+
+##### Exemplo
+```bash
+
+```
+
+## Execução do arquivo
+A extensão **.sh** é opcional (use para usufruir da colorização dos editores). Pode deixar sem nenhuma extensão se preferir.
+
+Todas as seguintes maneiras de chamar o arquivo **`lxf-file.sh`**, são válidas:
+
+* `lxf file` (sem lxf e .sh) 
+* `lxf lxf-file.sh` (nome do arquivo completo)
+* `lxf file.sh` (sem lxf)
+* `lxf lxf-file` (sem .sh)
+
+## Detalhes sobre a instalação
+A instalação nada mais é do que alguns arquivos que são incluidos em seus respectivos paths. Sem alterações em arquivos como ~/.bashrc ou qualquer outro. A remoção, é a exclusão destes.
+
+Default path do src e bin
+* **/usr/local/src**
+* **/usr/local/bin**
+
+### Alterar Paths
 
 Para facilitar o manuseio, não é utilizado variáveis de ambiente. Portanto, basta alterar o path em dois arquivos:
 
@@ -214,8 +344,7 @@ Para facilitar o manuseio, não é utilizado variáveis de ambiente. Portanto, b
     declare -r SRC_PATH="/usr/local/src"
     ```
 
-Uninstall
----
+### Uninstall
 
 Para desinstalar: 
 ```bash

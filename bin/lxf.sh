@@ -1,8 +1,8 @@
 #!/bin/bash
 
 ### Altere esta constante, caso nao tenha escolhido o path default ###
-# declare -r SRC_PATH="/usr/local/src"
-declare -r SRC_PATH="/home/raul/dev/lxf/src"
+declare -r SRC_PATH="/usr/local/src"
+# declare -r SRC_PATH="/home/raul/dev/lxf/src"
 
 source $SRC_PATH/lxf-colors.sh
 
