@@ -21,7 +21,7 @@ Crie o arquivo de exemplo: **`lxf-app.sh`**
 
 # Configurações básicas
 NETWORK "lxcbr0"
-STORAGE_PATH "/var/lib/lxd/storage-pools/zfs/containers" # coloque o seu storage path
+STORAGE_PATH "/var/lib/lxd/storage-pools/zfs/containers/$CONTAINER/rootfs" # coloque o seu storage path
 
 # Configuração avançada
 CONFIG "set $CONTAINER security.privileged true"
@@ -30,7 +30,7 @@ CONFIG "set $CONTAINER security.privileged true"
 FROM ubuntu/zesty/amd64
  
 # Executa comandos no container
-EXEC apt-get install -y software-properties-common
+EXEC ls
 ```
 No mesmo diretório, execute: `lxf app` 
 
@@ -306,6 +306,7 @@ FILES \
     "$server_host/config/lxf/lib-color.sh" \ # Idem src.sh
     "$src_dest" # Path destino destes arquivos. Se não existir, será criado
 ```
+Exemplo em ação: [create.sh](https://github.com/rauleite/lxf/tree/master/example/create-user/create.sh)
 
 ## FROM
 ```bash

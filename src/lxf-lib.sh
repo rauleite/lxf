@@ -94,7 +94,10 @@ function copy () {
     else
         echo_info "[ COPY ] $src $dest"     
         # sudo rsync -r -a --chown=$USER_NAME:$USER_NAME --rsync-path="sudo rsync" $@
-        sudo rsync -r --rsync-path="sudo rsync" $src $DEST_PATH$dest
+        echo "src - "$src
+        echo "dest - "$STORAGE_PATH$dest
+        # sudo rsync -r --rsync-path="sudo rsync" $src $STORAGE_PATH$dest
+        sudo cp -f -t $STORAGE_PATH$dest $src
         for i in $src
         do
             file_name="$(basename $i)"
@@ -296,17 +299,23 @@ function attach_network () {
     fi
 
     lxc network attach $NETWORK $CONTAINER
-    
+}
+function add_configs () {
+    stop_start_container
+
     ### Adiciona IP dinamico caso tenha informado IPV4 ### 
     if [[ ! -z $IPV4 ]]
     then
         echo_command "IPV4 $IPV4"
-        stop_start_container
+        # stop_start_container
         lxc config device set $CONTAINER $NETWORK ipv4.address $IPV4
     fi
-}
-function add_configs () {
-    stop_start_container
+
+    if [[ $PRIVILEGED == "true" ]]; then
+        echo_info "ALIAS: PRIVILEGED mode"
+        lxc config set $CONTAINER security.privileged true
+    fi
+
     for i in ${CONFIG[@]}
     do
         config=$(echo -e "$i" | sed -r 's/_/ /g')
@@ -332,27 +341,15 @@ function create_container () {
         echo_info "Usando o container $CONTAINER, existente."
     else
         echo_info "Criando container $CONTAINER"
-        if [[ $PRIVILEGED == "true" ]]
-        then
-            echo_info "ALIAS: PRIVILEGED mode"
 
-            if [[ $VERBOSE -lt $VERBOSE_LXC ]]
-            then
-                lxc launch $IMAGE $CONTAINER &>/dev/null
-            else
-                echo_command "lxc launch $IMAGE $CONTAINER"
-                lxc launch $IMAGE $CONTAINER 
-            fi
+        if [[ $VERBOSE -lt $VERBOSE_LXC ]]
+        then
+            lxc launch $IMAGE $CONTAINER &>/dev/null
         else
-            echo_info "ALIAS: UNPRIVILEGED mode"
-            if [[ $VERBOSE -lt $VERBOSE_LXC ]]
-            then
-                lxc launch $IMAGE $CONTAINER &>/dev/null
-            else
-                echo_command "lxc launch $IMAGE $CONTAINER"
-                lxc launch $IMAGE $CONTAINER
-            fi
+            echo_command "lxc launch $IMAGE $CONTAINER"
+            lxc launch $IMAGE $CONTAINER 
         fi
+        
         attach_network
         add_configs
         

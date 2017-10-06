@@ -166,10 +166,18 @@ function get_file() {
     if [[ -z $CONTAINER ]]; then
         # Remove . - lxd- .sh
         local name=$(echo $file | sed -r 's/[\.sh]|[lxf\-]|[\.]+|[\-]+|[\_]+//g')
-        echo "----------> "$name
         CONTAINER=$name
     fi
 
+    ### Seta user e group como root, caso nao tenha ### 
+    if [[ -z $USER_NAME ]]; then
+        USER_NAME='root'
+    fi
+
+    if [[ -z $USER_GROUP ]]; then
+        USER_GROUP='root'
+    fi
+    
     has_file=""
     file_to_source=""
     if [[ $file =~ ^(lxf-).*$ ]]
