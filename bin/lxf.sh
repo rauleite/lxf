@@ -15,6 +15,23 @@ declare QUIET="false"
 declare now=$(date +%Y%m%d_%H%M%S)
 declare tmp_file=/tmp/lXf_tEmP_fIlE_$now
 
+declare CONTAINER
+declare CONTAINER_CLI="false"
+declare IPV4
+declare IPV4_CLI="false"
+declare NETWORK
+declare NETWORK_CLI="false"
+declare FROM_VALUE
+declare FROM_VALUE_CLI="false"
+declare ENV_VALUE
+declare ENV_VALUE_CLI="false"
+declare PRIVILEGED
+declare PRIVILEGED_CLI="false"
+declare USER_NAME
+declare USER_NAME_CLI="false"
+declare USER_GROUP
+declare USER_GROUP_CLI="false"
+
 function finish {
     # echo_info "Removendo $tmp_file"
     # rm -rf $tmp_file
@@ -22,47 +39,92 @@ function finish {
 }
 trap finish EXIT
 
-usage () {
-    [[ ! -z $msg_error ]] && echo_error "$msg_error"
-    echo_info "Modo de uso do LXFramework"
-    echo -e "Para arquivo 'lxf-file.sh', chame: ${green}lxf file${nc}"
-    echo "Opts:"
-    echo -e "${green}-n   | --no-file    ${nc}Desconsidera sessao [ FILE ] e [ FILE_SSH ] "
-    echo -e "${green}-q   | --quiet      ${nc}Não exibe as informacoes"
-    echo -e "${green}-v   | --verbose1   ${nc}Mostra arquivo compilado"
-    echo -e "${green}-vv  | --verbose2   ${nc}Mostra retorno dos comandos LXC"
-    echo -e "${green}-vvv | --verbose3   ${nc}Mostra comandos dentro do container"
-    echo -e "${green}-h   | --help       ${nc}Exibe este help"
-    echo_info "Ex.:"
-    echo_command "lxf file -vv"
-    
-}
-
-if [[ $1 == "-h" ]] || [[ $1 == "--help" ]] 
-then
-    usage
-    exit 0
-fi
-
-
 # Shifts arg <lxc-file>
 shift
 
-for args in $@ 
-do
-    if [[ ! $args =~ ^(-) ]]
+usage () {
+    [[ ! -z $msg_error ]] && echo_error "$msg_error"
+    echo -e "${blue}"
+    echo -e "Opts:"
+    echo -e "${green}-c   --container         ${yellow}<nome>${nc}${blue} do container            | CONTAINER"
+    echo -e "${green}-n   --network           ${yellow}<nome>${nc}${blue} do device               | NETWORK"
+    echo -e "${green}-u   --user              ${yellow}<nome>${nc}${blue} do usuario              | USER_NAME"
+    echo -e "${green}-g   --group             ${yellow}<nome>${nc}${blue} do grupo do usuario     | USER_GROUP"
+    echo -e "${green}-e   --env               ${yellow}<path>${nc}${blue} ou ${yellow}\"<path> [<path2>]\"${nc}${blue}   | ENV"
+    echo -e "${green}-f   --from              ${yellow}<nome>${nc}${blue} da imagem               | FROM"
+    echo -e "${green}-cpr --conf-privileged   ${yellow}<true>${nc}${blue} ou ${yellow}<false>${nc}${blue}              | PRIVILEGED"
+    echo -e "${green}-cip --conf-ipv4         ${yellow}<numero>${nc}${blue} do ip fixo            | IPV4"
+    echo -e "${green}-nf  --no-file           ${nc}${blue}Desconsidera [ FILE ]"
+    echo -e "${green}-q   --quiet             ${nc}${blue}Não exibe as informacoes"
+    echo -e "${green}-v   --verbose1          ${nc}${blue}Mostra arquivo compilado"
+    echo -e "${green}-vv  --verbose2          ${nc}${blue}Mostra retorno dos comandos LXC"
+    echo -e "${green}-vvv --verbose3          ${nc}${blue}Mostra comandos dentro do container"
+    echo -e "${green}-h   --help              ${nc}${blue}Exibe este help"
+    echo ""
+    echo_info "Exemplos:"
+    echo_info "----------"
+    echo_info "lxf file"
+    echo_info "lxf file -nf"
+    echo_info "lxf file -vv -cip 10.99.125.11"
+    echo_info "lxf file -c mycontainer --conf-privileged true"
+    echo -e ${nc}
+    
+}
+
+while true; do
+    if [[ ! $1 =~ ^(-) ]]
     then
-        msg_error="argumento invalido: $args"
+        msg_error="argumento invalido: $1"
         usage
         exit 1
     fi
     
-    case $args in
+    case $1 in
         -h|--help)
             usage
             exit 0
         ;;
-        -n|--no-file)
+        -c|--container)
+            shift
+            CONTAINER=$1
+            CONTAINER_CLI="true"
+        ;;
+        -n|--network)
+            shift
+            NETWORK=$1
+            NETWORK_CLI="true"
+        ;;
+        -u|--user)
+            shift
+            USER_NAME=$1
+            USER_NAME_CLI="true"
+        ;;
+        -g|--group)
+            shift
+            USER_GROUP=$1
+            USER_GROUP_CLI="true"
+        ;;
+        -e|--env)
+            shift
+            ENV_VALUE=$1
+            ENV_VALUE_CLI="true"
+        ;;
+        -f|--from)
+            shift
+            FROM_VALUE=$1
+            FROM_VALUE_CLI="true"
+        ;;
+        -cpr|--conf-privileged)
+            shift
+            PRIVILEGED=$1
+            PRIVILEGED_CLI="true"
+        ;;
+        -cip|--conf-ipv4)
+            shift
+            IPV4=$1
+            IPV4_CLI="true"
+        ;;
+        -nf|--no-file)
             NO_FILE="true"
         ;;
         -v|--verbose1)
@@ -77,9 +139,15 @@ do
         -q|--quiet)
             QUIET="true"
         ;;
+        *)
+            msg_error="argumento invalido: $1"
+            usage
+            exit 1
+        ;;
     esac
+    shift
+    [[ $# == 0 ]] && break
 done
-
 
 function get_file() {
 
@@ -89,24 +157,37 @@ function get_file() {
         exit 1
     fi
 
+    # Define o comando, como nome do container, caso nao tenha passado -c.
+    # Mas considerara CONTAINER, caso esteja setado no arquivo
+    if [[ -z $CONTAINER ]]; then
+        # Remove . - lxd- .sh
+        local name=$(echo $file | sed -r 's/[\.sh]|[lxf\-]|[\.]+|[\-]+|[\_]+//g')
+        echo "----------> "$name
+        CONTAINER=$name
+    fi
+
     has_file=""
     file_to_source=""
     if [[ $file =~ ^(lxf-).*$ ]]
     then
+        # Nome completo 
         if [[ -f "$file" ]]
         then
             has_file="true"
             file_to_source="$file"
+        # Sem sh
         elif [[ -f "${file}.sh" ]]
         then
             has_file="true"
             file_to_source="${file}.sh"
         fi        
     else
+        # Sem lxf-
         if [[ -f "lxf-${file}" ]]
         then
             has_file="true"
             file_to_source="lxf-${file}"
+        # Sem sh e lxf-
         elif [[ -f "lxf-${file}.sh" ]]
         then
             has_file="true"

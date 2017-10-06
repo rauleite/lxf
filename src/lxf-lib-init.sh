@@ -1,17 +1,17 @@
 #!/bin/bash
 declare -r LOCAL_PATH="$(pwd)"
 declare CONFIG
-declare CONTAINER
+# declare CONTAINER
 declare STORAGE_PATH
 declare IMAGE
-declare IPV4
-declare NETWORK
-declare PRIVILEGED
-declare USER_NAME
-declare USER_GROUP
+# declare IPV4
+# declare NETWORK
+# declare PRIVILEGED
+# declare USER_NAME
+# declare USER_GROUP
 
-declare FROM_VALUE
-declare ENV_VALUE
+# declare FROM_VALUE
+# declare ENV_VALUE
 declare VOLUME_VALUE
 declare FILES_VALUE
 declare FILES_SSH_VALUE
@@ -22,22 +22,28 @@ function CONFIG (){
     config=$(echo -E "$@" | sed -r 's/(\s*)?[_=]?\s+/_/g')
     CONFIG=(${CONFIG[@]} "$config")
 }
-function CONTAINER (){ 
+function CONTAINER (){
+    [[ $CONTAINER_CLI == "true" ]] && return 0
     CONTAINER=$@
 }
 function PRIVILEGED () {
+    [[ $PRIVILEGED_CLI == "true" ]] && return 0
     PRIVILEGED="true"
 }
-function NETWORK (){ 
+function NETWORK (){
+    [[ $NETWORK_CLI == "true" ]] && return 0
     NETWORK=$@
 }
-function IPV4 (){ 
+function IPV4 (){
+    [[ $IPV4_CLI == "true" ]] && return 0    
     IPV4=$@
 }
-function USER_NAME (){ 
+function USER_NAME (){
+    [[ $USER_NAME_CLI == "true" ]] && return 0        
     USER_NAME=$@
 }
 function USER_GROUP (){ 
+    [[ $USER_GROUP_CLI == "true" ]] && return 0            
     USER_GROUP=$@
 }
 function VAR (){ 
@@ -54,8 +60,10 @@ function SOURCE () {
 
 ### POS INIT ###
 function FROM () {
+    [[ $FROM_VALUE_CLI == "true" ]] && return 0    
     FROM_VALUE=$@
 }
 function ENV () {
+    [[ $ENV_VALUE_CLI == "true" ]] && return 0        
     ENV_VALUE="$@"
 }

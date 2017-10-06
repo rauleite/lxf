@@ -39,8 +39,13 @@ Pronto, sua máquina será montada.
 
 *Mais sobre execução e nome arquivo, [aqui](execução-do-arquivo)*
 
-Sessões do manual
----
+## Sessões do manual
+
+### Comandos Cli
+Todos os argumentos passados via linha de comando terão prevalência sobre seus equivalentes existentes no arquivo.
+
+![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
+
 ### Tabela Rápida
 * [Comandos de configuração](#comandos-de-configuração)
 * [Comandos de execução](#comandos-de-execução)
@@ -120,9 +125,9 @@ Comando                     | Descrição                         | Sintaxe
 [VOLUME](#volume)           | Arquivo e diretorio compartilhado | `VOLUME <local-path> <container-path>`
 
 
-## Comandos Detalhados
+# Comandos Detalhados
 
-### CONFIG
+## CONFIG
 #### Sintaxe
 ```bash
 CONFIG <lxc-config>
@@ -150,7 +155,7 @@ CONFIG "device set $CONTAINER $NETWORK ipv4.address 10.99.125.10"
 # FROM ...
 ```
 
-### CONTAINER
+## CONTAINER
 ```bash
 CONTAINER "<name>"
 ```
@@ -174,7 +179,7 @@ CONFIG "set $CONTAINER security.privileged true"
 # Neste ponto container app está criado
 ```
 
-### COPY
+## COPY
 ```bash
 COPY <host path> <container path>
 ```
@@ -198,7 +203,7 @@ COPY ./package.json $server_vm/
 COPY $server_host/config $server_vm/
 ```
 
-### STORAGE_PATH
+## STORAGE_PATH
 ```bash
 STORAGE_PATH "<path>"
 ```
@@ -213,7 +218,7 @@ STORAGE_PATH "/var/lib/lxd/storage-pools/zfs/containers"
 # FROM...
 ```
 
-### ENV
+## ENV
 ```bash
 ENV "<app_path_1> [<app_path_2>] ...[<app_path_10>]"
 ```
@@ -253,7 +258,7 @@ COPY ./web/build $web_path/
 COPY ./server/build $web_path/
 ```
 
-### EXEC
+## EXEC
 ```bash
 EXEC <command>
 ```
@@ -273,7 +278,7 @@ EXEC \
 
 ```
 
-### FILES
+## FILES
 ```bash
 FILES <host_src_file.sh> [<resources_1.sh>] ...[<resources_10.sh>] <dest_path>
 ```
@@ -303,7 +308,7 @@ FILES \
     "$src_dest" # Path destino destes arquivos. Se não existir, será criado
 ```
 
-### FROM
+## FROM
 ```bash
 FROM <image>
 ```
@@ -322,7 +327,7 @@ FROM minha/imagem/nodejs
 # ...
 ```
 
-### HOST_EXEC
+## HOST_EXEC
 ```bash
 HOST_EXEC <command>
 ```
@@ -350,7 +355,7 @@ VOLUME $web_host/build $web_vm/
 # ...
 ```
 
-### IPV4
+## IPV4
 ```bash
 IPV4 <ip.fixo.do.container>
 ```
@@ -374,7 +379,7 @@ IPV4 "10.99.125.10"
 # FROM ...
 ```
 
-### NETWORK
+## NETWORK
 ```bash
 NETWORK <nome_do_device>
 ```
@@ -386,7 +391,7 @@ NETWORK "lxcbr0"
 ```
 **NETWORK** é um comando de conveniência, um alias para: `lxc network attach $NETWORK $CONTAINER`
 
-### PRIVILEGED
+## PRIVILEGED
 ```bash
 PRIVILEGED "<true>" ou "<false>"
 ```
@@ -398,7 +403,7 @@ PRIVILEGED "true"
 ```
 **PRIVILEGED** é um comando de conveniência, um alias para: `CONFIG "set $CONTAINER security.privileged true"`
 
-### SOURCE
+## SOURCE
 ```bash
 SOURCE <path-to-lxf-file>
 ```
@@ -456,7 +461,7 @@ Funciona exatamente como a ideia da keyword `source` do bash. Outras linguagens 
     # Entenda como que se o conteúdo de lxf-web-src.sh, estivesse daqui pra baixo
     SOURCE ./lxf-web-src.sh
     ```
-### USER_NAME
+## USER_NAME
 ```bash
 USER_NAME "<name>"
 ```
@@ -465,7 +470,7 @@ USER_NAME "rleite"
 ```
 User existente no container, que será assumido para executar comandos. Caso deseje executar como user root, basta fazer: `USER_NAME "root"`	
 
-### USER_GROUP
+## USER_GROUP
 ```bash
 USER_GROUP "<name>"
 ```
@@ -474,7 +479,7 @@ USER_GROUP "rleite"
 ```
 GROUP existente no container, que será assumido para executar comandos. Caso deseje executar como group root, basta fazer: `USER_GROUP "root"`	
 
-### VAR
+## VAR
 ```bash
 VAR <key> "<value>"
 ```
@@ -523,7 +528,7 @@ EXEC "cd $server_vm && yarn start"
 EXEC "sudo rm -r $server_vm/src"
 ```
 
-### VOLUME
+## VOLUME
 ```bash
 VOLUME <host-path> <container-path>
 ```
