@@ -8,13 +8,13 @@ git clone https://github.com/rauleite/lxf.git && cd lxf
 ./install.sh
 cd ../ && sudo rm -r ./lxf #Opcional
 ```
-*Para maiores detalhes sobre a instalação, paths e desinstação, [aqui](detalhes-sobre-a-instalação)*
+*Para maiores detalhes sobre a instalação, paths e desinstação, [aqui](#detalhes-sobre-a-instalação)*
 
 ## Get started
 
 Já tendo feito o `sudo lxd init`, como descrito na página de [configurações iniciais do lxd](https://stgraber.org/2016/03/15/lxd-2-0-installing-and-configuring-lxd-212/), basta criar o seguinte arquivo:
 
-Crie arquivo: **`lxf-file.sh`**
+Crie o arquivo de exemplo: **`lxf-file.sh`**
 
 ```bash
 # lxf-file.sh
@@ -22,6 +22,7 @@ Crie arquivo: **`lxf-file.sh`**
 # Configurações básicas
 CONTAINER "app"
 NETWORK "lxcbr0"
+STORAGE_PATH "/var/lib/lxd/storage-pools/zfs/containers" # coloque o seu storage path
 
 # Configuração avançada
 CONFIG "set $CONTAINER security.privileged true"
@@ -32,13 +33,11 @@ FROM ubuntu/zesty/amd64
 # Executa comandos no container
 EXEC apt-get install -y software-properties-common
 ```
-No mesmo diretório, execute:
-
-`lxf file` 
+No mesmo diretório, execute: `lxf file` 
 
 Pronto, sua máquina será montada.
 
-*Mais sobre execução pelo nome arquivo, [aqui](execução-do-arquivo)*
+*Mais sobre execução e nome arquivo, [aqui](execução-do-arquivo)*
 
 Sessões do manual
 ---
@@ -112,7 +111,7 @@ EXEC apt-get install -y software-properties-common
 Comando                     | Descrição                         | Sintaxe
 :--                         | :--                               | :--
 [COPY](#copy)               | Copia host -> container           | `COPY <host path> <container path>`
-[ENV](#env)                 | Cria folder, com nome e grupo     | `ENV "app_path_1 app_path_2"`
+[ENV](#env)                 | Cria folder, com nome e grupo     | `<app_path_1> [<app_path_2>] ...[<app_path_10>]`
 [EXEC](#exec)               | Executa comandos no container     | `EXEC <command>`
 [FILES](#files)             | Executa arquivo no container      | `FILES <path_to_local_file>`
 [FROM](#from)               | Imagem a ser usada                | `FROM <image>`
@@ -123,14 +122,19 @@ Comando                     | Descrição                         | Sintaxe
 
 ## Comandos Detalhados
 
-#### CONFIG
+### CONFIG
+#### Sintaxe
 ```bash
 CONFIG <lxc-config>
 ```
-* Utilizado para setar qualquer [configuração lxd](https://github.com/lxc/lxd/blob/master/doc/configuration.md), junto à criação do container.
+```bash
+CONFIG "set app security.privileged true"
+```
+
+* Utilizado para setar qualquer [configuração lxd](https://github.com/lxc/lxd/blob/master/doc/configuration.md), junto à criação do container. Utiliza a mesma sintaxe.
 * Pode repetir o commando **CONFIG** quantas vezes forem necessárias, para criação do container desejado.
 
-##### Exemplo:
+#### Exemplo:
 ```bash
 CONTAINER "app"
 NETWORK "lxcbr0"
@@ -158,10 +162,17 @@ CONTAINER "<name>"
 ##### Exemplo:
 ```bash
 CONTAINER "app"
-# ...
+```
+Exemplo prático
+```bash
+CONTAINER "app"
+
+# Usando CONTAINER como referência
 CONFIG "set $CONTAINER security.privileged true"
 
 # FROM ...
+
+# Neste ponto container app está criado
 ```
 
 ### COPY
@@ -172,44 +183,112 @@ Copia arquivo ou diretório, do host para o container.
 
 ##### Exemplo
 ```bash
-
+COPY ./config/proxy/nginx.conf /etc/nginx/
+COPY ./config/proxy/default /etc/nginx/sites-enabled/
 ```
 
 ### STORAGE_PATH
 ```bash
-`STORAGE_PATH "<path>"`
+STORAGE_PATH "<path>"
 ```
+Indique o local do seu Storage backends.
+Por exemplo, o default path do ZFS é: **/var/lib/lxd/storage-pools/zfs/containers**
 
 ##### Exemplo
 ```bash
-
+# Exemplo no caso do ZFS
+STORAGE_PATH "/var/lib/lxd/storage-pools/zfs/containers"
 ```
 
 ### ENV
 ```bash
-
+ENV "<app_path_1> [<app_path_2>] ...[<app_path_10>]"
 ```
+**ENV** é um comando de conveniência para criação de um diretório (normalmente raiz das suas aplicações). Ele fará o seguinte:
+
+1. Criará <app_path_1>, se ainda não existir...
+    * Pseudo code:
+        * `sudo mkdir -p <paths>`
+
+1. com usuário e grupo indicado em `$USER_NAME` e `$USER_GROUP`...
+    * Pseudo code:
+        * `sudo chown $USER_NAME:$USER_GROUP <paths>`
+
+2. e também vai setar este mesmo user e group como padrão, dos demais arquivos criados neste path.
+    * Pseudo code:
+        * `sudo chmod g+s <paths>`
 
 ##### Exemplo
 ```bash
+# FROM ...
+ENV "/var/www"
 
+```
+Exemplo prático:
+
+```bash
+VAR web_path "/var/www"
+VAR server_path "/var/server"
+# FROM ...
+
+ENV "$web_path $server_path"
+# Neste ponto já existe /var/www e /var/server
+
+# ...
+
+# Referenciando
+COPY ./web/build $web_path/
+COPY ./server/build $web_path/
 ```
 
 ### EXEC
 ```bash
-
+EXEC <command>
 ```
+Executa comandos no container
 
 ##### Exemplo
+```bash
+EXEC cd /var/server && yarn install
+
+# Linha quebrada e com VAR
+EXEC \
+    cd $server_vm && \
+    yarn start
+
+```
 
 ### FILES
 ```bash
-
+FILES <host_src_file.sh> [<resources_1.sh>] ...[<resources_10.sh>] <dest_path>
 ```
+
+**FILES** é um comando de conveniência para execução de um arquivo, diretamente de dentro do próprio container.
+
+O arquivo indicado será compiado para o container, e executado de dentro dele, considerando o devido `$USER_NAME`.
+
+Se for passado mais de um arquivo, será compreendido que o primeiro é para execução, os intermediários são resources (utilizados por este primeiro), e o último é o path de destino dos arquivos.
 
 ##### Exemplo
 ```bash
+FILES "/home/raul/dev/config/lxf/app.sh"
+```
 
+Exemplo prático:
+```bash
+USER_NAME "rauleite"
+# ...
+
+VAR server_host "/home/raul/server"
+VAR src_dest "/home/$USER_NAME/src_dest"
+
+# FROM ...
+
+FILES \
+    "$server_host/config/lxf/app.sh" \ # Este será executado
+    "$server_host/config/lxf/src.sh" \ # Resource utilizado pelo app.sh
+    "$server_host/config/lxf/lib-color.sh" \ # Idem src.sh
+    "$src_dest" # Path destino destes arquivos. Se não existir, será criado
 ```
 
 ### FROM
