@@ -154,16 +154,15 @@ CONFIG "device set $CONTAINER $NETWORK ipv4.address 10.99.125.10"
 ```bash
 CONTAINER "<name>"
 ```
+```bash
+CONTAINER "app"
+```
 
 * Nome atribuido ao container
 * Se não existir container com este nome, um novo será criado. Caso contrário utilizará o container existente.
 * O comando **CONTAINER** também pode ser utilizado como variável no corpo do arquivo:
 
 ##### Exemplo:
-```bash
-CONTAINER "app"
-```
-Exemplo prático
 ```bash
 CONTAINER "app"
 
@@ -179,12 +178,24 @@ CONFIG "set $CONTAINER security.privileged true"
 ```bash
 COPY <host path> <container path>
 ```
+```bash
+COPY ./config/proxy/default /etc/nginx/sites-enabled/
+```
 Copia arquivo ou diretório, do host para o container.
 
 ##### Exemplo
 ```bash
-COPY ./config/proxy/nginx.conf /etc/nginx/
-COPY ./config/proxy/default /etc/nginx/sites-enabled/
+
+USER_NAME "rleite"
+
+# ...
+
+VAR server_vm "/home/$USER_NAME/server"
+
+# FROM ...
+
+COPY ./package.json $server_vm/
+COPY $server_local/config $server_vm/
 ```
 
 ### STORAGE_PATH
@@ -198,6 +209,8 @@ Por exemplo, o default path do ZFS é: **/var/lib/lxd/storage-pools/zfs/containe
 ```bash
 # Exemplo no caso do ZFS
 STORAGE_PATH "/var/lib/lxd/storage-pools/zfs/containers"
+
+# FROM...
 ```
 
 ### ENV
@@ -262,7 +275,9 @@ EXEC \
 ```bash
 FILES <host_src_file.sh> [<resources_1.sh>] ...[<resources_10.sh>] <dest_path>
 ```
-
+```bash
+FILES "/home/raul/dev/config/lxf/app.sh"
+```
 **FILES** é um comando de conveniência para execução de um arquivo, diretamente de dentro do próprio container.
 
 O arquivo indicado será compiado para o container, e executado de dentro dele, considerando o devido `$USER_NAME`.
@@ -270,11 +285,6 @@ O arquivo indicado será compiado para o container, e executado de dentro dele, 
 Se for passado mais de um arquivo, será compreendido que o primeiro é para execução, os intermediários são resources (utilizados por este primeiro), e o último é o path de destino dos arquivos.
 
 ##### Exemplo
-```bash
-FILES "/home/raul/dev/config/lxf/app.sh"
-```
-
-Exemplo prático:
 ```bash
 USER_NAME "rauleite"
 # ...
