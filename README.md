@@ -44,7 +44,7 @@ Pronto, sua máquina será montada.
 ### Comandos Cli
 Todos os argumentos passados via linha de comando terão prevalência sobre seus equivalentes existentes no arquivo.
 
-![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
+![help](https://github.com/rauleite/lxf/blob/master/help.png "lxf -h - brazilian help")
 
 ### Tabela Rápida
 * [Comandos de configuração](#comandos-de-configuração)
