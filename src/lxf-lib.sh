@@ -7,7 +7,7 @@ declare -r VERBOSE_CONTAINER=3
 function ct_restart() {
         echo ""    
         echo_info "Finalizando"
-        lxc restart $CONTAINER
+        lxc restart $CONTAINER &> /dev/null
         echo -e "${nc}"
         
         exit 1
@@ -39,7 +39,7 @@ function exec_cmd_user_ssh () {
 
 ### UTILS ###
 function until_host () {
-    echo "Conectando: $1"
+    echo_info "Conectando: $1"
     if [[ $VERBOSE -lt $VERBOSE_LXC ]]
     then
         exec_cmd_user "until ping -c1 $1 &>/dev/null; do sleep 1; done"
@@ -107,8 +107,7 @@ function copy () {
     
 }
 function files () {
-    if [[ $NO_FILE == "true" ]]
-    then
+    if [[ $NO_FILE == "true" ]]; then
         echo_info "[ NO FILES ]"
         return 0        
     fi
@@ -254,6 +253,7 @@ function read_container () {
         CONTAINER=$ct_name_read
     fi
 }
+# Esta obsoleto, usando root como default atualmetnte
 function read_user () {
     if [[ -z $USER_NAME ]]
     then
@@ -300,6 +300,20 @@ function attach_network () {
 
     lxc network attach $NETWORK $CONTAINER
 }
+
+function define_storage_path () {
+    # Se ja STORAGE_PATH ja foi definido, sai
+    [[ ! -z $STORAGE_PATH ]] && return 0
+    
+    # Se nao ha STORAGE
+    if [[ -z $STORAGE ]]; then
+        echo_error "Precisa setar o nome do poll em STORAGE ou setar o path em STORAGE_PATH"
+        exit 1
+    else
+        STORAGE_PATH="/var/lib/lxd/storage-pools/$STORAGE/containers/$CONTAINER/rootfs"
+    fi
+    
+}
 function add_configs () {
     stop_start_container
 
@@ -339,6 +353,7 @@ function create_container () {
     if [[ $? == "0" ]]
     then
         echo_info "Usando o container $CONTAINER, existente."
+        lxc start $CONTAINER &>/dev/null
     else
         echo_info "Criando container $CONTAINER"
 
@@ -355,6 +370,21 @@ function create_container () {
         
         stop_start_container               
     fi
+}
+function signal_cli () {
+    echo_info "[ SIGNAL ] $1"
+    local valid_value=("restart" "stop" "start" "RESTART" "STOP" "START")
+
+    for i in $valid_value; do
+        if [[ "$1" == $i  ]]; then
+            echo_info "$1 $CONTAINER"
+            $(lxc $1 $CONTAINER)
+            echo "---"
+            return 0
+            echo "fim"
+        fi
+    done
+    until_host $CONTAINER
 }
 function install_rsync () {
     exists 'rsync'

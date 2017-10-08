@@ -38,12 +38,15 @@ Pronto, sua máquina será montada.
 
 *Mais sobre execução e nome arquivo, [aqui](execução-do-arquivo)*
 
+## Em ação
+Além do manual dos comandos mais abaixo, pode também saltar para um [exemplo real e mais complexo](https://github.com/rauleite/lxf/blob/master/example), com bastante interação entre comandos.
+
 ## Sessões do manual
 
-### Comandos Cli
-Todos os argumentos passados via linha de comando terão precedência sobre seus equivalentes existentes no arquivo.
+### Linha de comando
+![help](https://github.com/rauleite/lxf/blob/master/help.png "lxf -h -> brazilian help")
 
-![help](https://github.com/rauleite/lxf/blob/master/help.png "lxf -h - brazilian help")
+*Mais sobre [opções linha de comando](#opções-de-linha-de-comando)*
 
 ### Tabela Rápida
 * [Comandos de configuração](#comandos-de-configuração)
@@ -58,8 +61,10 @@ Todos os argumentos passados via linha de comando terão precedência sobre seus
 * [FILES](#files)
 * [FROM](#from)
 * [HOST_EXEC](#host_exec)
+* [SIGNAL](#signal)
 * [SOURCE](#source)
-* [STORAGE_PATH](#dest_path)
+* [STORAGE](#storage)
+* [STORAGE_PATH](#storage_path)
 * [IPV4](#ipv4)
 * [NETWORK](#network)
 * [PRIVILEGED](#privileged)
@@ -67,6 +72,47 @@ Todos os argumentos passados via linha de comando terão precedência sobre seus
 * [USER_GROUP](#user_group)
 * [VAR](#var)
 * [VOLUME](#volume)
+
+## Opções de linha de comando
+Todas as opções de linha de comando têm precedência sobre os comandos definidos no arquivo.
+
+##### Exemplo
+```bash
+# lxf-app.sh
+
+NETWORK "lxcbr01"
+
+# FROM ...
+```
+Arquivo chamado via:
+
+`lxf app --network lxcbr02`
+
+O valor de NETWORK considerado para o container, será **lxcbr02**.
+
+Mesmo que o arquivo defina um valor ao NETWORK, ele será ignorado uma vez que também foi setado como opção de linha de comando.
+
+#### Caso do CONTAINER
+Além de via opção de linha de comando e pelo comando CONTAINER do arquivo, o nome do container também pode ser definido simplesmente pelo nome do arquivo.
+
+##### Exemplo
+```bash
+# lxf-app.sh
+
+# CONTAINER omitido
+# ...
+# FROM ...
+```
+Chamando de qualquer de uma das possíveis maneiras:
+
+* `lxf app`
+* `lxf lxf-app.sh`
+* `lxf lxf-app`
+* `lxf app.sh`
+
+O nome do container será **app**. Note que mesmo CONTAINER sendo omitido, e não tendo sido setado a opção `-c app` (ou `--container app`) via linha de comando, o nome do container será atribuido considerando o nome do arquivo (sem lxf- e .sh se houver).
+
+
 
 
 ## Tabela rápida de comandos
@@ -91,6 +137,7 @@ Comando                     | Descrição                             | Sintaxe
 :--                         | :--                                   | :--
 [CONFIG](#config)           | Qualquer [configuração lxd](https://github.com/lxc/lxd/blob/master/doc/configuration.md)   | `CONFIG <lxc-config>`
 [CONTAINER](#container)         | Nome do container                 | `CONTAINER "<name>"`
+[STORAGE](#storage)             | Nome do Storage pool              | `STORAGE "<nome>"`
 [STORAGE_PATH](#storage_path)   | Path do Storage                   | `STORAGE_PATH "<path>"`
 [IPV4](#ipv4)                   | Alias para ipv4 config            | `IPV4 <ip.fixo.do.container>`
 [NETWORK](#network)             | Nome do device para brigde        | `NETWORK <nome_do_device>`
@@ -120,6 +167,7 @@ Comando                     | Descrição                         | Sintaxe
 [FILES](#files)             | Executa arquivo no container      | `FILES <path_to_local_file>`
 [FROM](#from)               | Imagem a ser usada                | `FROM <image>`
 [HOST_EXEC](#host_exec)     | Executa comando no host           | `HOST_EXEC <command>`
+[SIGNAL](#signal)           | start, stop ou restart container  | `SIGNAL "start" | "stop" | "restart"`
 [SOURCE](#source)           | Reaproveita outro lxf-file        | `SOURCE "<path-to-lxf-file>"`
 [VOLUME](#volume)           | Arquivo e diretorio compartilhado | `VOLUME <local-path> <container-path>`
 
@@ -164,13 +212,27 @@ CONTAINER "app"
 
 * Nome atribuido ao container
 * Se não existir container com este nome, um novo será criado. Caso contrário utilizará o container existente.
-* O comando **CONTAINER** também pode ser utilizado como variável no corpo do arquivo:
+* O comando **CONTAINER** também pode ser utilizado como variável no corpo do arquivo.
 
 ##### Exemplo:
 ```bash
 CONTAINER "app"
 
 # Usando CONTAINER como referência
+CONFIG "set $CONTAINER security.privileged true"
+
+# FROM ...
+
+# Neste ponto container app está criado
+```
+Omitindo comando CONTAINER
+```bash
+# CONTAINER "app" --> Omitido
+
+# Ainda assim é possível utilizar o comando CONTAINER como referência.
+# Neste caso o nome do container será baseado por duas alternativas:
+    # a) pelo nome do arquivo: lxf app;
+    # b) pela configuração no caso de ter sido passado: lxf app -c myapp 
 CONFIG "set $CONTAINER security.privileged true"
 
 # FROM ...
@@ -202,20 +264,50 @@ COPY ./package.json $server_vm/
 COPY $server_host/config $server_vm/
 ```
 
-## STORAGE_PATH
+## STORAGE
 ```bash
-STORAGE_PATH "<path>"
+STORAGE "<nome>"
 ```
-Indique o path do seu Storage backends.
-Por exemplo, o default path do ZFS é: **/var/lib/lxd/storage-pools/zfs/containers**
+```bash
+STORAGE "meupool"
+```
+Indique o nome do Storage pool.
+
+Opte por usar STORAGE ao invés de STORAGE_PATH, por ser mais simples.
+
+Obs. Não há sentido semântico usar ambos, porém se acontecer, será considerado o valor de STORAGE_PATH e STORAGE será ignorado.
 
 ##### Exemplo
 ```bash
 # Exemplo no caso do ZFS
-STORAGE_PATH "/var/lib/lxd/storage-pools/zfs/containers"
+STORAGE "meupool"
 
 # FROM...
 ```
+A critério de comparação, teria exatamente o mesmo efeito que setar o STORAGE_PATH, como:
+```bash
+STORAGE_PATH "/var/lib/lxd/storage-pools/meupool/containers/$CONTAINER/rootfs"
+```
+
+## STORAGE_PATH
+```bash
+STORAGE_PATH "<path>"
+```
+Indique o path personalizado do seu Storage backends.
+
+Prefira por usar STORAGE ao invés de STORAGE_PATH.
+
+Obs. Não há sentido semântico usar ambos, porém se acontecer, será considerado o STORAGE_PATH e STORAGE será ignorado.
+
+##### Exemplo
+```bash
+# Exemplo no caso do ZFS
+STORAGE_PATH "/var/lib/lxd/storage-pools/meupool/containers/$CONTAINER/rootfs"
+
+# FROM...
+```
+
+*Compare com [STORAGE](#storage)*
 
 ## ENV
 ```bash
@@ -290,6 +382,8 @@ O arquivo indicado será compiado para o container, e executado de dentro dele, 
 
 Se for passado mais de um arquivo, será compreendido que o primeiro é para execução, os intermediários são resources (utilizados por este primeiro), e o último é o path de destino dos arquivos.
 
+Normalmente apenas um comando FILES será o suficiente, porém se houver a necessidade de setar mais de um comando FILES em um mesmo arquivo, multiplos comandos FILES são suportados.  
+
 ##### Exemplo
 ```bash
 USER_NAME "rauleite"
@@ -306,7 +400,7 @@ FILES \
     "$server_host/config/lxf/lib-color.sh" \ # Idem src.sh
     "$src_dest" # Path destino destes arquivos. Se não existir, será criado
 ```
-Exemplo em ação: [create.sh](https://github.com/rauleite/lxf/tree/master/example/create-user/create.sh)
+Exemplo em ação: [lxf-create.sh](https://github.com/rauleite/lxf/blob/master/example/create_user/lxf-create.sh)
 
 ## FROM
 ```bash
@@ -402,6 +496,17 @@ PRIVILEGED "true"
 # ...
 ```
 **PRIVILEGED** é um comando de conveniência, um alias para: `CONFIG "set $CONTAINER security.privileged true"`
+
+## SIGNAL
+```bash
+SIGNAL "start" | "stop" | "restart"
+```
+```bash
+SIGNAL "restart"
+```
+Envia sinal ao CONTAINER, de start, stop ou restart.
+
+Semelhante à fazer na linha de comando: `lxc restart mycontainer`
 
 ## SOURCE
 ```bash
@@ -590,3 +695,11 @@ ou *(caso não tenha mais os resources baixado)*
 git clone https://github.com/rauleite/lxf.git && cd lxf && ./uninstall.sh && cd ../ && sudo rm -r ./lxf
 ```
 Obs. Mesmo no caso de ter customizado o Path ao instalar, o comando acima é suficiente pra remover os arquivos corretos.
+
+## TODO
+* Criar yaml file, como docker-compose com [mikefarah/yaml](https://github.com/mikefarah/yaml)
+* Criar Gui para REST API, com React Material e Nodejs no back.
+* Criar repo - Lxfhub
+* Criar mais configuracoes do tipo alias, de conveniências, como IPV4
+* Deixar STORAGE_PATH mais user friendly.
+<!-- * Criar mais parametros pra passar via cli. -->

@@ -3,6 +3,7 @@
 function FROM_INIT () {
     echo_info "[ FROM ] $@"
     IMAGE=$1
+    define_storage_path
     create_container
     post_from
 }
@@ -29,7 +30,7 @@ init () {
     [[ $is_started == "true" ]] && return 0
     [[ ! -z $FROM_VALUE ]]      && FROM_INIT $FROM_VALUE
     # [[ ! -z $STORAGE_PATH ]]    && STORAGE_PATH=$STORAGE_PATH/$CONTAINER/rootfs
-    [[ ! -z $STORAGE_PATH ]]    && STORAGE_PATH=$STORAGE_PATH
+    # [[ ! -z $STORAGE_PATH ]]    && STORAGE_PATH=$STORAGE_PATH
     [[ ! -z $ENV_VALUE ]]       && ENV_INIT $ENV_VALUE
     # [[ ! -z $FILES_VALUE ]]     && FILES_INIT $FILES_VALUE
     # [[ ! -z $FILES_SSH_VALUE ]] && FILES_SSH_INIT $FILES_SSH_VALUE
@@ -81,4 +82,8 @@ function EXEC () {
 function EXEC_SSH () {
     init
     exec_cmd_user_ssh "$@"
+}
+function SIGNAL () {
+    init
+    signal_cli "$1"
 }

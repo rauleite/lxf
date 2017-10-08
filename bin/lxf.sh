@@ -17,20 +17,30 @@ declare tmp_file=/tmp/lXf_tEmP_fIlE_$now
 
 declare CONTAINER
 declare CONTAINER_CLI="false"
+
 declare IPV4
 declare IPV4_CLI="false"
+
 declare NETWORK
 declare NETWORK_CLI="false"
+
 declare FROM_VALUE
 declare FROM_VALUE_CLI="false"
+
 declare ENV_VALUE
 declare ENV_VALUE_CLI="false"
+
 declare PRIVILEGED
 declare PRIVILEGED_CLI="false"
+
 declare USER_NAME
 declare USER_NAME_CLI="false"
+
 declare USER_GROUP
 declare USER_GROUP_CLI="false"
+
+declare STORAGE
+declare STORAGE_CLI="false"
 
 function finish {
     # echo_info "Removendo $tmp_file"
@@ -46,14 +56,15 @@ usage () {
     [[ ! -z $msg_error ]] && echo_error "$msg_error"
     echo -e "${blue}"
     echo -e "Opts:"
-    echo -e "${green}-c   --container         ${yellow}<nome>${nc}${blue} do container            | CONTAINER"
-    echo -e "${green}-n   --network           ${yellow}<nome>${nc}${blue} do device               | NETWORK"
-    echo -e "${green}-u   --user              ${yellow}<nome>${nc}${blue} do usuario              | USER_NAME"
-    echo -e "${green}-g   --group             ${yellow}<nome>${nc}${blue} do grupo do usuario     | USER_GROUP"
-    echo -e "${green}-e   --env               ${yellow}<path>${nc}${blue} ou ${yellow}\"<path> [<path2>]\"${nc}${blue}   | ENV"
-    echo -e "${green}-f   --from              ${yellow}<nome>${nc}${blue} da imagem               | FROM"
-    echo -e "${green}-cpr --conf-privileged   ${yellow}<true>${nc}${blue} ou ${yellow}<false>${nc}${blue}              | PRIVILEGED"
-    echo -e "${green}-cip --conf-ipv4         ${yellow}<numero>${nc}${blue} do ip fixo            | IPV4"
+    echo -e "${green}-c   --container         ${yellow}<nome>${nc}${blue} do container              | CONTAINER"
+    echo -e "${green}-n   --network           ${yellow}<nome>${nc}${blue} do device                 | NETWORK"
+    echo -e "${green}-u   --user              ${yellow}<nome>${nc}${blue} do usuario                | USER_NAME"
+    echo -e "${green}-g   --group             ${yellow}<nome>${nc}${blue} do grupo do usuario       | USER_GROUP"
+    echo -e "${green}-e   --env               ${yellow}<path>${nc}${blue} ou ${yellow}\"<path> [<path2>]\"${nc}${blue}     | ENV"
+    echo -e "${green}-s   --storage           ${yellow}<nome>${nc}${blue} do storage pool           | STORAGE"
+    echo -e "${green}-f   --from              ${yellow}<nome>${nc}${blue} da imagem                 | FROM"
+    echo -e "${green}-cpr --conf-privileged   ${yellow}<true>${nc}${blue} ou ${yellow}<false>${nc}${blue}                | PRIVILEGED"
+    echo -e "${green}-cip --conf-ipv4         ${yellow}<numero>${nc}${blue} do ip fixo              | IPV4"
     echo -e "${green}-nf  --no-file           ${nc}${blue}Desconsidera [ FILE ]"
     echo -e "${green}-q   --quiet             ${nc}${blue}Não exibe as informacoes"
     echo -e "${green}-v   --verbose1          ${nc}${blue}Mostra arquivo compilado"
@@ -109,6 +120,11 @@ while true; do
             shift
             ENV_VALUE=$1
             ENV_VALUE_CLI="true"
+        ;;
+        -s|--storage)
+            shift
+            STORAGE_VALUE=$1
+            STORAGE_VALUE_CLI="true"
         ;;
         -f|--from)
             shift
@@ -229,9 +245,11 @@ function lexico () {
         "FROM" \
         "HOST_EXEC" \
         "IPV4" \
+        "SIGNAL" \
         "NETWORK" \
         "PRIVILEGED" \
         "SOURCE" \
+        "STORAGE" \
         "STORAGE_PATH" \
         "USER_NAME" \
         "USER_GROUP" \

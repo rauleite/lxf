@@ -1,5 +1,12 @@
 #!/bin/bash
+
+# Vai instalar alguns essenciais, deletar usuario ubuntu padrão, criar um novo interativamente,
+# e deixar ele pronto para receber conexão SSH
+
+# Source referenciado no comando FILES
 source ./create_src.sh
+
+exit 0
 
 apt-get install -y build-essential
 apt-get install -y openssh-server

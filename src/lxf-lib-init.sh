@@ -41,6 +41,11 @@ function VAR (){
     echo_info "[ VAR ] $@"
     export $1="$2" 
 }
+function STORAGE () {
+    [[ $STORAGE_CLI == "true" ]] && return 0    
+    echo_info "[ STORAGE ] $@"
+    STORAGE=$@
+}
 function STORAGE_PATH () {
     echo_info "[ STORAGE_PATH ] $@"
     STORAGE_PATH=$@
